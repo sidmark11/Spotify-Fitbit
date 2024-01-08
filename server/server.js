@@ -20,6 +20,19 @@ var spotify_redirect_uri = 'http://localhost:8888/spotifycallback'; // Your redi
 var spotify_access_token = '';
 var spotify_refersh_token = '';
 
+// formatting dates to have as API query parameter when needed
+const today = new Date();
+const today_year = today.getFullYear();
+const today_month = (today.getMonth() + 1).toString().padStart(2, '0'); // Adding 1 because months are zero-based
+const today_day = today.getDate().toString().padStart(2, '0');
+const todayaFormatted = `${today_year}-${today_month}-${today_day}`;
+
+const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+const tomorrow_year = tomorrow.getFullYear();
+const tomorrow_month = (tomorrow.getMonth() + 1).toString().padStart(2, '0'); // Adding 1 because months are zero-based
+const tomorrow_day = tomorrow.getDate().toString().padStart(2, '0');
+const tomorrowFormatted = `${tomorrow_year}-${tomorrow_month}-${tomorrow_day}`;
+
 
 const generateRandomString = (length) => {
   return crypto
@@ -240,8 +253,6 @@ app.get('/fitbitactivities', async function(req, res) {
 app.get('/fitbittest', async function(req, res) {
    const received_data = req.body; 
   try {
-    console.log('access token:');
-
     // this segment gets user profile and from there we get the age (we'll use this to calculate the different zones later)
       // we can do all the fitbit stuff here and then redirect to another endpoint in node with headers to pass on the appropriate data
     const user_profile = await axios.get('https://api.fitbit.com/1/user/-/profile.json', {
@@ -253,11 +264,106 @@ app.get('/fitbittest', async function(req, res) {
 
     const user_age = user_profile.data.user.age;
 
-  
+    // now get an array with the top 3 favorite workouts, if zero then send back an error
+
+    // gets an array of JSON objects with information about users' favorite workouts
+    let favorite_activities = await axios.get('https://api.fitbit.com/1/user/-/activities/favorite.json', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + req.headers.token
+      }
+    })
+    favorite_activities = favorite_activities.data;
+    let length = favorite_activities.length;
+    if (length === 0){
+      throw new Error('User has no favorite activities');
+    }
+    else if (length > 3){
+      length = 3;
+    }
+
+    const fav_names = new Map();
+    for (let i = 0; i < length; i++){
+      fav_names.set(favorite_activities[i].name, []); // gets array with top two workout names
+    }
+
+    // get the activities data and filter by favorites using the fav_names array
+    let fitbit_activities = await axios.get(`https://api.fitbit.com/1/user/-/activities/list.json?beforeDate=${tomorrowFormatted}&sort=asc&offset=0&limit=100`, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + req.headers.token
+      }
+    })
+    fitbit_activities = fitbit_activities.data.activities;
+    // returns array of JSON activities that have name that's in the fav_names array (filter)
+      // uses a function to only include if JSON name in fav_names
+    const filtered_arr = fitbit_activities.filter(obj => fav_names.has(obj.activityName));
+
+    // fitbit says max heart rate is 220 - age and uses that to calculate heart rate zones
+      // below zone: < 50% max HR
+      // fat burn zone: between 50 and 69% of max HR
+      // cardio zone: between 70 and 84% of max HR
+      //  peak 85% max HR <= 
+      const max_heart_rate = 220 - user_age; 
+      const below_zone = max_heart_rate * 0.375;
+      const fat_burn = ((max_heart_rate * 0.5) + (max_heart_rate * 0.69)) / 2;
+      const cardio = ((max_heart_rate * 0.7) + (max_heart_rate * 0.84)) / 2;
+      const peak = max_heart_rate * 0.9;
+      
+      // creating mapping between zone type and heart rate to calculate average
+      const zone_map = new Map();
+      zone_map.set('OUT_OF_ZONE', below_zone);
+      zone_map.set('FAT_BURN', fat_burn);
+      zone_map.set('CARDIO', cardio);
+      zone_map.set('PEAK', peak);
+
+    // next step is to get the AVG heart rate for each activity type (one value for each fav_name)
+    for (let i = 0; i < filtered_arr.length; i++){
+      if(filtered_arr[i].activeZoneMinutes.totalMinutes > 0){
+        const activity_name = filtered_arr[i].activityName;
+        // const current_val = fav_names.get(activity_name);
+        let current_val = 0;
+        let minutes = 0;
+        const minutes_in_zone_arr = filtered_arr[i].activeZoneMinutes.minutesInHeartRateZones;
+        // console.log('minutes arr:')
+        // console.log(minutes_in_zone_arr);
+        for (let j = 0; j < minutes_in_zone_arr.length; j++){
+          const zone_type_name = minutes_in_zone_arr[j].type;
+          minutes += minutes_in_zone_arr[j].minutes;
+          current_val += minutes_in_zone_arr[j].minutes * zone_map.get(zone_type_name);
+        }
+        current_val = current_val / minutes;
+        let array_to_update = fav_names.get(activity_name);
+        array_to_update.push(current_val);
+        fav_names.set(activity_name, array_to_update);
+      }
+      
+    }
+    // res.send(fav_names);
+
+    fav_names.forEach((value, key) => {
+      // const temp_arr = fav_names.get(key);
+      // const length = temp_arr.length;
+      
+      if (value.length != 0) {
+        let average = 0;
+        for(let i = 0; i < value.length; i++){
+          average += value[i];
+        }
+        average = average / value.length;
+        fav_names.set(key, average);
+      }
+      else {
+        fav_names.set(key, 0);
+      }
+    });
+    // console.log(fav_names);
+    const ret_val = Object.fromEntries(fav_names);
+    res.send(ret_val);
   }
   catch (error) {
-    console.log('err')
-    res.status(500).send('Failed to fetch favorite workouts');
+    console.log(error)
+    res.status(500).send(error);
   }
 })
 
@@ -267,7 +373,7 @@ app.get('/fitbittest', async function(req, res) {
 console.log('Listening on 8888');
 app.listen(8888);
 // correct token prints out --> spotify access token is stored in the variable now
-  setTimeout(() => {
-      console.log("access token var after timeout: ")
-      console.log(spotify_access_token);
-  }, 10000);
+// setTimeout(() => {
+//     console.log("access token var after timeout: ")
+//     console.log(spotify_access_token);
+// }, 10000);
