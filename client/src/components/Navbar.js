@@ -36,6 +36,7 @@ function Navbar(props) {
     }
   }
 
+  console.log(props);
   //useEffect allows us to run side effects (additional logic) 
     //when certain dependencies (conditions) are met
     //Ex: an empty array means only when a component is rendered (page is opened or refreshed or component is reloaded, etc)
@@ -71,7 +72,7 @@ function Navbar(props) {
           {/* if a button on the menu was clicked, then the menu should be on screen, else it should be closed */}
           <ul className={click ? 'nav-menu active' : 'nav-menu'}>
             <li className='nav-item'>
-              <Link to='/' className='nav-links' onClick={closeMobileMenu}>
+              <Link to='/home' className='nav-links' onClick={closeMobileMenu}>
                 Home
               </Link>
             </li>
@@ -88,7 +89,7 @@ function Navbar(props) {
             
           </ul>
           <div>
-            {props.isSpotify ? (
+            {props.isSpotify ? ( //spotify_logged_in
               button && <Button buttonStyle='btn--outline'>Logged Into Spotify</Button>
             ) : (
               button && <Button route='http://localhost:8888/spotifylogin' buttonStyle='btn--outline'>Spotify Log In</Button>
