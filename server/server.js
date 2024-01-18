@@ -55,7 +55,7 @@ app.get('/spotifylogin', function(req, res) {
   res.cookie(stateKey, state);
 
   // your application requests authorization
-  var scope = 'user-read-private user-read-email user-read-playback-state';
+  var scope = 'user-read-private user-read-email user-read-playback-state user-top-read playlist-modify-public playlist-modify-private';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -110,20 +110,11 @@ app.get('/spotifycallback', function(req, res) {
           json: true
         };
 
-        // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
           //console.log(body);
         });
 
-        // we can also pass the token to the browser to make requests from there
-        res.redirect('http://localhost:3000/spotifylogin/#' +
-          querystring.stringify({
-            access_token: access_token,
-            refresh_token: refresh_token
-          }));  // If we comment this part out then the tokens won't be in the URL or hash anymore
-      // maybe we should redirect to another route in the server and keep the spotify access token in the server rather than frontend
-        // trying to get hold of it in the backend and make global scope, now we should be able to make requests without passing token 
-        // back and forth between front and back end 
+        res.redirect('http://localhost:3000/home#spotify')
       } else {
         res.redirect('http://localhost:3000/spotifylogin/#' +
           querystring.stringify({
@@ -164,7 +155,7 @@ app.get('/spotifyrefresh_token', function(req, res) {
 
 const fitbit_client_id = '23RM29';
 const fitbit_secret_client = 'c5809c24b7051f017f979ce0b3aa9eec';
-const fitbit_redirect_uri = 'http://localhost:3000/fitbitlogin';
+const fitbit_redirect_uri = 'http://localhost:3000/home';
 const fitbit_auth_endpoint = 'https://www.fitbit.com/oauth2/authorize';
 const fitbit_response_type = 'token';
 let fitbit_access_token = '';
@@ -173,83 +164,128 @@ app.get('/fitbitlogin', function(req, res) {
   res.redirect(`${fitbit_auth_endpoint}?response_type=${fitbit_response_type}&client_id=${fitbit_client_id}&redirect_uri=${fitbit_redirect_uri}&scope=activity%20heartrate%20location%20nutrition%20profile%20settings%20sleep%20social%20weight&expires_in=86400`);
 })
 
-// fitbit says max heart rate is 220 - age and uses that to calculate heart rate zones
-  // below zone: < 50% max HR
-  // fat burn zone: between 50 and 69% of max HR
-  // cardio zone: between 70 and 84% of max HR
-  //  peak 85% max HR <= 
-app.get('/fitbituser', async function(req, res) {
-  const received_data = req.body; // data put in the get request from react
-  try {
-    console.log('access token:');
-
-    console.log(req.headers.token);
-    // making the function aysnc so that it won't continue until we get a response from fitbit
-    const fitbit_response = await axios.get('https://api.fitbit.com/1/user/-/profile.json', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + req.headers.token
-      }
-    })
-
-    console.log(fitbit_response.data.user);
-    res.send(fitbit_response.data.user);
-  }
-  catch (error) {
-    console.log('err')
-    res.status(500).send('Failed to fetch user profile data');
-  }
-})
-
-// can you send all fitbit queries to same endpoint and do different ones based on the info pased
-app.get('/fitbitfavorites', async function(req, res) {
+app.get('/spotifygenre', async function(req, res) {
    const received_data = req.body; // data put in the get request from react
   try {
-    console.log('access token:');
-
-    console.log(req.headers.token);
     // making the function aysnc so that it won't continue until we get a response from fitbit
-    const fitbit_response = await axios.get('https://api.fitbit.com/1/user/-/activities/favorite.json', {
-      method: 'GET',
+    const spotify_genres = await axios.get('https://api.spotify.com/v1/recommendations/available-genre-seeds', {
       headers: {
-        'Authorization': 'Bearer ' + req.headers.token
+        'Authorization': 'Bearer ' + spotify_access_token
       }
     })
-
-    const fitbit_data = fitbit_response.data;
-    console.log(fitbit_data);
-    res.send(fitbit_data);
+    console.log(spotify_genres.data);
+    // can't send back JSON with circular reference (prop is prop of itself) so send back .data
+    res.send(spotify_genres.data);
   }
   catch (error) {
-    console.log('err')
-    res.status(500).send('Failed to fetch favorite workouts');
+    console.log(error)
+    res.status(500).send('Failed to fetch available genres');
   }
 })
 
-app.get('/fitbitactivities', async function(req, res) {
-   const received_data = req.body; // data put in the get request from react
+app.get('/spotifyartist', async function(req, res) {
   try {
-    console.log('access token:');
-
-    console.log(req.headers.token);
-    // making the function aysnc so that it won't continue until we get a response from fitbit
-    const fitbit_response = await axios.get('https://api.fitbit.com/1/user/-/activities/list.json?beforeDate=2024-01-07&sort=asc&offset=0&limit=100', {
-      method: 'GET',
+    const spotify_artists = await axios.get('https://api.spotify.com/v1/me/top/artists?limit=100', {
       headers: {
-        'Authorization': 'Bearer ' + req.headers.token
+        'Authorization': 'Bearer ' + spotify_access_token
       }
     })
+    console.log(spotify_artists.data);
+    const artist_data = spotify_artists.data.items;
+    const genres_arr = req.headers.genres.split(',');
+    let valid_artists = [];
 
-    const fitbit_data = fitbit_response.data; // array of JSON activity data in JSON format
-    console.log(fitbit_data);
-    res.send(fitbit_data);
+    console.log(typeof genres_arr);
+    console.log(genres_arr);
+    const max_artists = 5 - genres_arr.length;
+
+   let searchable_genres_arr = genres_arr.map(str => str.replace(/-/g, ' '));
+  
+    for(let i = 0; i < artist_data.length; i++) {
+      if (searchable_genres_arr.some(element => artist_data[i].genres.includes(element)))
+      {
+        valid_artists.push(artist_data[i].id);
+      }
+      if (valid_artists.length === max_artists) {
+        break;
+      }
+    }
+    console.log(valid_artists);
+    const seed_genres = genres_arr.join('%2C');
+    const seed_artists = valid_artists.join('%2C');
+    const seed_bpm = Math.trunc((req.headers.bpm - 5));
+    let seed_energy = (seed_bpm / 180) + 0.075;
+    if (seed_energy > 1){
+      seed_energy = 1;
+    }
+    console.log(seed_genres);
+    console.log(seed_artists);
+
+    const recommendations = await axios.get(`https://api.spotify.com/v1/recommendations?seed_artists=${seed_artists}&seed_genres=${seed_genres}&target_tempo=${seed_bpm}&target_energy=${seed_energy}&limit=30`, {
+      headers: {
+        'Authorization': 'Bearer ' + spotify_access_token
+      }
+    })
+    console.log(recommendations.data.tracks);
+    console.log("TESTING");
+    let user_id = await axios.get(`https://api.spotify.com/v1/me`, {
+      headers: {
+        'Authorization': 'Bearer ' + spotify_access_token
+      }
+    })
+    console.log(user_id.data);
+    user_id = user_id.data.id;
+    console.log("USER-ID: ")
+    console.log(user_id);
+
+    const playlist_creation_input = {
+      name: req.headers.playlist_name,
+      description: `New ${req.headers.workout} playlist`,
+      public: false
+    };
+    const playlist = await axios(`https://api.spotify.com/v1/users/${user_id}/playlists`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + spotify_access_token,
+        'Content-Type' : 'application/json'
+      }, 
+      data: JSON.stringify(playlist_creation_input)
+    })
+
+    const playlist_id = playlist.data.id; // playlist id to use when adding songs to playlist
+
+    const song_recommendations = recommendations.data.tracks;
+    let uri_seed = [];
+    for(let i = 0; i < song_recommendations.length; i++){
+      uri_seed.push(song_recommendations[i].uri);
+    }
+
+    const playlist_addition_input = {
+      uris: uri_seed,
+      position: 0
+    }
+
+    const add_to_playlist = await  axios(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + spotify_access_token,
+        'Content-Type' : 'application/json'
+      }, 
+      data: JSON.stringify(playlist_addition_input)
+    })
+
+    res.send('worked');
   }
   catch (error) {
-    console.log('err')
-    res.status(500).send('Failed to fetch favorite workouts');
+    console.log(error);
+    res.send(error);
   }
 })
 
+// 
+
+//  now providing heart rate for some (if you start it from your watch) 
+//  have it such that if you can't directly get heart rate then calculate it
 app.get('/fitbittest', async function(req, res) {
    const received_data = req.body; 
   try {
@@ -263,8 +299,6 @@ app.get('/fitbittest', async function(req, res) {
     })
 
     const user_age = user_profile.data.user.age;
-
-    // now get an array with the top 3 favorite workouts, if zero then send back an error
 
     // gets an array of JSON objects with information about users' favorite workouts
     let favorite_activities = await axios.get('https://api.fitbit.com/1/user/-/activities/favorite.json', {
@@ -305,7 +339,7 @@ app.get('/fitbittest', async function(req, res) {
       // cardio zone: between 70 and 84% of max HR
       //  peak 85% max HR <= 
       const max_heart_rate = 220 - user_age; 
-      const below_zone = max_heart_rate * 0.375;
+      const below_zone = max_heart_rate * 0.33;
       const fat_burn = ((max_heart_rate * 0.5) + (max_heart_rate * 0.69)) / 2;
       const cardio = ((max_heart_rate * 0.7) + (max_heart_rate * 0.84)) / 2;
       const peak = max_heart_rate * 0.9;
@@ -318,9 +352,17 @@ app.get('/fitbittest', async function(req, res) {
       zone_map.set('PEAK', peak);
 
     // next step is to get the AVG heart rate for each activity type (one value for each fav_name)
+    console.log(filtered_arr);
     for (let i = 0; i < filtered_arr.length; i++){
-      if(filtered_arr[i].activeZoneMinutes.totalMinutes > 0){
-        const activity_name = filtered_arr[i].activityName;
+      const activity_name = filtered_arr[i].activityName;
+      if(filtered_arr[i].averageHeartRate)
+      {
+        let array_to_update = fav_names.get(activity_name);
+        array_to_update.push(filtered_arr[i].averageHeartRate);
+        fav_names.set(activity_name, array_to_update);
+        console.log('has heartrate');
+      }
+      else if(filtered_arr[i].activeZoneMinutes.totalMinutes > 0){
         // const current_val = fav_names.get(activity_name);
         let current_val = 0;
         let minutes = 0;
@@ -339,25 +381,26 @@ app.get('/fitbittest', async function(req, res) {
       }
       
     }
-    // res.send(fav_names);
 
     fav_names.forEach((value, key) => {
-      // const temp_arr = fav_names.get(key);
-      // const length = temp_arr.length;
-      
-      if (value.length != 0) {
-        let average = 0;
-        for(let i = 0; i < value.length; i++){
-          average += value[i];
+      if (Array.isArray(value)) {
+        if (value.length != 0) {
+          let average = 0;
+          for(let i = 0; i < value.length; i++){
+            average += value[i];
+          }
+          average = average / value.length;
+          fav_names.set(key, average);
         }
-        average = average / value.length;
-        fav_names.set(key, average);
-      }
-      else {
-        fav_names.set(key, 0);
+        else {
+          fav_names.set(key, 0);
+        }
       }
     });
-    // console.log(fav_names);
+
+    console.log(fav_names);
+
+    // cant send a map back so we turn it into a JSON and send it back
     const ret_val = Object.fromEntries(fav_names);
     res.send(ret_val);
   }
@@ -372,8 +415,3 @@ app.get('/fitbittest', async function(req, res) {
 
 console.log('Listening on 8888');
 app.listen(8888);
-// correct token prints out --> spotify access token is stored in the variable now
-// setTimeout(() => {
-//     console.log("access token var after timeout: ")
-//     console.log(spotify_access_token);
-// }, 10000);
