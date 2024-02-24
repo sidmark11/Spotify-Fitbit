@@ -12,14 +12,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons'
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
-
+// handle the double promise in here ???????
 
 
 function Navbar(props) {
   // sets state for click variable so we track when buttons along the navbar have been clicked
   const [click, setClick] = useState(false);
   const [button, setButton] = useState(true);
+  const [spotify, set_spotify] = useState(false);
 
   // if the menu button is clicked then we toggle between true and false
   const handleClick = () => setClick(!click);
@@ -35,6 +37,21 @@ function Navbar(props) {
       setButton(true)
     }
   }
+
+   function handlePromise(promise) {
+        return promise
+            .then(data => ({ success: true, data }))
+            .catch(error => ({ success: false, error }));
+    }
+
+    async function spotifyLogin() {
+      const response = await axios.get('http://localhost:8888/spotifylogin', {});
+      console.log("test");
+      console.log(response);
+      // if(response.data.status === 200) {
+
+      // }
+    }
 
   console.log(props);
   //useEffect allows us to run side effects (additional logic) 
@@ -58,19 +75,19 @@ function Navbar(props) {
       {/* creatign navbar at top */}
       <nav className="navbar"> 
         <div className="navbar-container">
-          <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
+          {/* <Link to='/home' className='navbar-logo' onClick={closeMobileMenu}>
             <FontAwesomeIcon icon={faEnvelope} />
-          </Link>
+          </Link> */}
           {/* if the bars are clicked, then click is toggled,
             we can only have the bars display at <= 960px due to smth we put in css (media query)  */}
-          <div className="menu-icon" onClick={handleClick}>
+          {/* <div className="menu-icon" onClick={handleClick}>
             <FontAwesomeIcon icon={click ? faTimes : faBars} />
-          </div>
+          </div> */}
           {/* ul is unordered list where it has li (list elements) in side of it
             and these are displayed in the order they're listed in. each ul here contains a link to a 
             specific part of the page*/}
           {/* if a button on the menu was clicked, then the menu should be on screen, else it should be closed */}
-          <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+          <ul className='nav-menu'>
             <li className='nav-item'>
               <Link to='/home' className='nav-links' onClick={closeMobileMenu}>
                 Home
@@ -81,15 +98,19 @@ function Navbar(props) {
                 Create Playlists
               </Link>
             </li>
-            {/* <li className='nav-item'>
-              <Link to='/' className='nav-links-mobile' onClick={closeMobileMenu}>
-                Sign Up
+            <li className='nav-item'>
+              <Link to='http://localhost:8888/spotifylogin' className='nav-links' onClick={closeMobileMenu}>
+                Spotify Login
               </Link>
-            </li> */}
-            
+            </li>
+            <li className='nav-item'>
+              <Link to='http://localhost:8888/fitbitlogin' className='nav-links' onClick={closeMobileMenu}>
+                Fitbit Login
+              </Link>
+            </li>
           </ul>
           <div>
-            {props.isSpotify ? ( //spotify_logged_in
+            {/* {props.isSpotify ? ( //spotify_logged_in
               button && <Button buttonStyle='btn--outline'>Logged Into Spotify</Button>
             ) : (
               button && <Button route='http://localhost:8888/spotifylogin' buttonStyle='btn--outline'>Spotify Log In</Button>
@@ -103,7 +124,7 @@ function Navbar(props) {
               button && <Button buttonStyle='btn--outline'>Logged Into Fitbit</Button>
             ) : (
               button && <Button route='http://localhost:8888/fitbitlogin' buttonStyle='btn--outline'>Fitbit Log In</Button>
-            )}
+            )} */}
           </div>
           
           
