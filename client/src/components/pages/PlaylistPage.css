@@ -1,0 +1,58 @@
+.select {
+    min-width: 350px;
+}
+
+.select::before,
+.select::after {
+  --size: 0.3rem;
+  position: absolute;
+  content: "";
+  right: 1rem;
+  pointer-events: none;
+}
+
+.select::before {
+  border-left: var(--size) solid transparent;
+  border-right: var(--size) solid transparent;
+  border-bottom: var(--size) solid black;
+  top: 40%;
+}
+
+.select::after {
+  border-left: var(--size) solid transparent;
+  border-right: var(--size) solid transparent;
+  border-top: var(--size) solid black;
+  top: 55%;
+}
+
+
+.text {
+    color: white;
+}
+
+.inputField {
+    height: 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    box-shadow: 0 0px 5px #39ff14;
+    color: white;
+    background-color: black;
+    font-weight: 800;
+}
+
+.placeholder {
+    color: white;
+}
+
+.dropdown {
+    background-color: #39ff14;
+}
+
+.error__text {
+    color: white;
+    font-size: 25px;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    height: 10vh;
+}

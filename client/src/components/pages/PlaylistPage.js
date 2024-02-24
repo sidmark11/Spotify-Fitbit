@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios';
+import './PlaylistPage.css'
 
 function PlaylistPage() {
     const [workout_heart_rates, set_workout_heart_rates] = useState();
@@ -48,8 +49,6 @@ function PlaylistPage() {
     async function workout_hr() {
          if (localStorage.getItem('fitbit_access_token')) {
             let access_token = localStorage.getItem('fitbit_access_token');
-            console.log('fitbit token:');
-            console.log(access_token);
             try {
                 const response = await axios.get('http://localhost:8888/fitbittest', {
                     headers: {
@@ -72,8 +71,6 @@ function PlaylistPage() {
     async function genres() {
         try {
             let access_token = localStorage.getItem('spotify_access_token');
-            console.log('spotify token:')
-            console.log(access_token);
             const response = await axios.get('http://localhost:8888/spotifygenre', {
                 headers: {
                     token: access_token
@@ -100,6 +97,11 @@ function PlaylistPage() {
                     }
                 });
                 set_genres_arr(response.data.genres); 
+                console.log(response.data.status)
+                if (response.data.status === 400) {
+                    const refresh = await axios.get('http://localhost:8888/spotifyrefresh_token')
+                    console.log(refresh)
+                }
                 console.log('done');
             }
             else {
@@ -112,49 +114,101 @@ function PlaylistPage() {
         }
     }
 
-    function trigger() {
-        workout_hr();
-        genres();
+    function handlePromise(promise) {
+        return promise
+            .then(data => ({ success: true, data }))
+            .catch(error => ({ success: false, error }));
     }
+
+    async function startPlaylist()  {
+        console.log("triggered")
+        const [result1, result2] = await Promise.all([
+            handlePromise(workout_hr()),
+            handlePromise(genres()),
+        ]);
+
+        // This part waits until both handlePromise calls are settled.
+        if (!result1.success || !result2.success) {
+            alert('Log into both Spotify and Fitbit to create a playlist');
+        } 
+    }
+
+    // empty dependency array means only run on initial mount
+    // no dependency means run on initial mount and every re-render
+        // unmount happens when we re-render and the new page does not include a component that is currently mounted
+    useEffect(() => {
+        // Code here runs once after the initial render
+        // const starter = async () => {
+        //     console.log("inside")
+        //     const [result1, result2] = await Promise.all([
+        //         handlePromise(workout_hr()),
+        //         handlePromise(genres()),
+        //     ]);
+
+        //     // This part waits until both handlePromise calls are settled.
+        //     if (!result1.success || !result2.success) {
+        //         alert('Log into both Spotify and Fitbit to create a playlist');
+        //     } 
+        // }
+        startPlaylist();
+    }, []);
 
     return (
         <div>
-            <p>{JSON.stringify(workout_heart_rates, null, 2)}</p>
+            {/* <p>{JSON.stringify(workout_heart_rates, null, 2)}</p> */}
             {genres_arr && favorite_workouts ? (
                 <div>
-                    <div>
-                        <label htmlFor="inputField">Select a genre:</label>
-                        <input type="text" id="inputGenre" list="genreslist" name="chosenOption" placeholder='Ex: acoustic'/>
-                        <datalist id="genreslist">
+                    <div className='select'>
+                        {/* <label htmlFor="inputField">Select a genre:</label> */}
+                        {/* <input className="inputField" type="text" id="inputGenre" list="genreslist" name="chosenOption" placeholder='Ex: acoustic'/> */}
+                        {/* <datalist className="dropdown" id="genreslist">
                             {genres_arr.map((genre, index) => (
                             <option key={index} value={genre} />
                             ))}
-                        </datalist>
-                        <button onClick={update_preferred}>Submit Genre</button>
+                        </datalist> */}
+                        <select className="inputField" onChange={update_preferred} id="inputGenre">
+                            <option className='dropdown'>Choose your genere(s)</option>
+                            {genres_arr.map((option, index) => {
+                                return (
+                                    <option key={index}>
+                                        {option}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                        {/* <button className="submit__button" onClick={update_preferred}>Submit Genre</button> */}
 
-                        <input type="text" name="chosenOption" id="Workout" placeholder='Ex: running' list="favoriteWorkouts"/>
-                        <datalist id="favoriteWorkouts">
+                        {/* <input className="inputField" type="text" name="chosenOption" id="Workout" placeholder='Ex: running' list="favoriteWorkouts"/>
+                        <datalist className="dropdown" id="favoriteWorkouts">
                             {favorite_workouts.map((workout, index) => (
                                 <option key={index} value={workout} /> 
                             ))}
                         </datalist>
-                        <button onClick={update_selected_workout}>Submit Workout</button>
+                        <button className="submit__button" onClick={update_selected_workout}>Submit Workout</button> */}
+                        <select className="inputField" onChange={update_selected_workout} id="Workout">
+                            <option className='dropdown'>Select a workout</option>
+                            {favorite_workouts.map((option, index) => {
+                                return (
+                                    <option key={index}>
+                                        {option}
+                                    </option>
+                                );
+                            })}
+                        </select>
 
-                        <input type="text" id="playlistName" name="inputtedPlaylist" placeholder='Playlist Name'/>
-                        <button onClick={update_playlist_name}>Submit Playlist</button>
+                        <input className="inputField" type="text" id="playlistName" name="inputtedPlaylist" placeholder='Playlist Name'/>
+                        <button className="submit__button" onClick={update_playlist_name}>Submit Playlist</button>
                     </div>
                     <div>
-                        <button onClick={artists}>Get Playlist</button> 
+                        <button className="submit__button" onClick={artists}>Get Playlist</button> 
                     </div>
                 </div>                
             ) : (
-                <div>
-                    <button onClick={trigger}>Start</button>
-                </div>
+                <div className='error__text'>Please log into both Fitbit and Spotify to create a playlist</div>
             )}
-            <p>{preferred_genres}</p>
-            <p>{selected_workout}</p>
-            <p>{playlist_name}</p>
+            <p className='text'>{preferred_genres}</p>
+            <p className='text'>{selected_workout}</p>
+            <p className='text'>{playlist_name}</p>
         </div>
      )
 }
