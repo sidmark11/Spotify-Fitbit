@@ -5,7 +5,7 @@ import LoginPage from './components/pages/LoginPage.js';
 import PlaylistPage from './components/pages/PlaylistPage.js';
 import HomePage from './components/pages/HomePage.js';
 import { useState, useEffect } from 'react';
-
+import './App.css'
 
 
 function App() {
