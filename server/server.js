@@ -1,11 +1,3 @@
-/**
- * This is an example of a basic node.js script that performs
- * the Authorization Code oAuth2 flow to authenticate against
- * the Spotify Accounts.
- *
- * For more information, read
- * https://developer.spotify.com/documentation/web-api/tutorials/code-flow
- */
 var axios = require('axios');
 var express = require('express');
 var request = require('request');
@@ -14,9 +6,9 @@ var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
-var spotify_client_id = '1f23b2a56ec84e1f8d92a61f68c696c7'; // your clientId
-var spotify_client_secret = '85a4cca80fd54e438c0ce32d31bc8373'; // Your secret
-var spotify_redirect_uri = 'http://localhost:8888/spotifycallback'; // Your redirect uri
+var spotify_client_id = '1f23b2a56ec84e1f8d92a61f68c696c7'; 
+var spotify_client_secret = '85a4cca80fd54e438c0ce32d31bc8373'; 
+var spotify_redirect_uri = 'http://localhost:8888/spotifycallback'; 
 var spotify_access_token = '';
 var spotify_refersh_token = '';
 
@@ -56,7 +48,7 @@ app.get('/spotifylogin', function(req, res) {
 
   // your application requests authorization
   var scope = 'user-read-private user-read-email user-read-playback-state user-top-read playlist-modify-public playlist-modify-private';
-  res.redirect('https://accounts.spotify.com/authorize?' +
+  var redirectToSpotify = res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
       client_id: spotify_client_id,
@@ -64,6 +56,8 @@ app.get('/spotifylogin', function(req, res) {
       redirect_uri: spotify_redirect_uri,
       state: state
     }));
+
+    res.status(200).send("Success");
 });
 
 app.get('/spotifycallback', function(req, res) {
@@ -114,7 +108,7 @@ app.get('/spotifycallback', function(req, res) {
           //console.log(body);
         });
 
-        res.redirect('http://localhost:3000/home#spotify')
+        res.redirect('http://localhost:3000/#spotify')
       } else {
         res.redirect('http://localhost:3000/spotifylogin/#' +
           querystring.stringify({
@@ -122,6 +116,20 @@ app.get('/spotifycallback', function(req, res) {
           }));
       }
     });
+
+    if (!state || !code) {
+    // Handle missing state or code
+    res.status(400).send('Missing state or code');
+    return;
+    }
+
+    // Handle state validation if needed
+    var storedState = req.cookies ? req.cookies[stateKey] : null;
+    if (state !== storedState) {
+      // Handle invalid state
+      res.status(400).send('Invalid state');
+      return;
+    }
   }
 });
 
@@ -155,7 +163,7 @@ app.get('/spotifyrefresh_token', function(req, res) {
 
 const fitbit_client_id = '23RM29';
 const fitbit_secret_client = 'c5809c24b7051f017f979ce0b3aa9eec';
-const fitbit_redirect_uri = 'http://localhost:3000/home';
+const fitbit_redirect_uri = 'http://localhost:3000/';
 const fitbit_auth_endpoint = 'https://www.fitbit.com/oauth2/authorize';
 const fitbit_response_type = 'token';
 let fitbit_access_token = '';
@@ -173,7 +181,6 @@ app.get('/spotifygenre', async function(req, res) {
         'Authorization': 'Bearer ' + spotify_access_token
       }
     })
-    console.log(spotify_genres.data);
     // can't send back JSON with circular reference (prop is prop of itself) so send back .data
     res.send(spotify_genres.data);
   }
@@ -185,21 +192,20 @@ app.get('/spotifygenre', async function(req, res) {
 
 app.get('/spotifyartist', async function(req, res) {
   try {
-    const spotify_artists = await axios.get('https://api.spotify.com/v1/me/top/artists?limit=100', {
+    // getting users' top artists and selecting the top 3 that include users' specified genres for workout playlist
+    const spotify_artists = await axios.get('https://api.spotify.com/v1/me/top/artists?limit=50', {
       headers: {
         'Authorization': 'Bearer ' + spotify_access_token
       }
     })
-    console.log(spotify_artists.data);
     const artist_data = spotify_artists.data.items;
     const genres_arr = req.headers.genres.split(',');
     let valid_artists = [];
 
-    console.log(typeof genres_arr);
-    console.log(genres_arr);
     const max_artists = 5 - genres_arr.length;
 
-   let searchable_genres_arr = genres_arr.map(str => str.replace(/-/g, ' '));
+    // get rid of hyphens to search for genres in artists
+    let searchable_genres_arr = genres_arr.map(str => str.replace(/-/g, ' '));
   
     for(let i = 0; i < artist_data.length; i++) {
       if (searchable_genres_arr.some(element => artist_data[i].genres.includes(element)))
@@ -210,7 +216,6 @@ app.get('/spotifyartist', async function(req, res) {
         break;
       }
     }
-    console.log(valid_artists);
     const seed_genres = genres_arr.join('%2C');
     const seed_artists = valid_artists.join('%2C');
     const seed_bpm = Math.trunc((req.headers.bpm - 5));
@@ -218,25 +223,18 @@ app.get('/spotifyartist', async function(req, res) {
     if (seed_energy > 1){
       seed_energy = 1;
     }
-    console.log(seed_genres);
-    console.log(seed_artists);
 
     const recommendations = await axios.get(`https://api.spotify.com/v1/recommendations?seed_artists=${seed_artists}&seed_genres=${seed_genres}&target_tempo=${seed_bpm}&target_energy=${seed_energy}&limit=30`, {
       headers: {
         'Authorization': 'Bearer ' + spotify_access_token
       }
     })
-    console.log(recommendations.data.tracks);
-    console.log("TESTING");
     let user_id = await axios.get(`https://api.spotify.com/v1/me`, {
       headers: {
         'Authorization': 'Bearer ' + spotify_access_token
       }
     })
-    console.log(user_id.data);
     user_id = user_id.data.id;
-    console.log("USER-ID: ")
-    console.log(user_id);
 
     const playlist_creation_input = {
       name: req.headers.playlist_name,
@@ -277,20 +275,16 @@ app.get('/spotifyartist', async function(req, res) {
     res.send('worked');
   }
   catch (error) {
-    console.log(error);
+    console.log(error.response.data);
+    console.log(error.response.status);
+    console.log(error.response.headers);
     res.send(error);
   }
 })
 
-// 
-
-//  now providing heart rate for some (if you start it from your watch) 
-//  have it such that if you can't directly get heart rate then calculate it
 app.get('/fitbittest', async function(req, res) {
    const received_data = req.body; 
   try {
-    // this segment gets user profile and from there we get the age (we'll use this to calculate the different zones later)
-      // we can do all the fitbit stuff here and then redirect to another endpoint in node with headers to pass on the appropriate data
     const user_profile = await axios.get('https://api.fitbit.com/1/user/-/profile.json', {
       method: 'GET',
       headers: {
@@ -318,10 +312,9 @@ app.get('/fitbittest', async function(req, res) {
 
     const fav_names = new Map();
     for (let i = 0; i < length; i++){
-      fav_names.set(favorite_activities[i].name, []); // gets array with top two workout names
+      fav_names.set(favorite_activities[i].name, []); 
     }
 
-    // get the activities data and filter by favorites using the fav_names array
     let fitbit_activities = await axios.get(`https://api.fitbit.com/1/user/-/activities/list.json?beforeDate=${tomorrowFormatted}&sort=asc&offset=0&limit=100`, {
       method: 'GET',
       headers: {
@@ -329,30 +322,21 @@ app.get('/fitbittest', async function(req, res) {
       }
     })
     fitbit_activities = fitbit_activities.data.activities;
-    // returns array of JSON activities that have name that's in the fav_names array (filter)
-      // uses a function to only include if JSON name in fav_names
+
     const filtered_arr = fitbit_activities.filter(obj => fav_names.has(obj.activityName));
 
-    // fitbit says max heart rate is 220 - age and uses that to calculate heart rate zones
-      // below zone: < 50% max HR
-      // fat burn zone: between 50 and 69% of max HR
-      // cardio zone: between 70 and 84% of max HR
-      //  peak 85% max HR <= 
       const max_heart_rate = 220 - user_age; 
       const below_zone = max_heart_rate * 0.33;
       const fat_burn = ((max_heart_rate * 0.5) + (max_heart_rate * 0.69)) / 2;
       const cardio = ((max_heart_rate * 0.7) + (max_heart_rate * 0.84)) / 2;
       const peak = max_heart_rate * 0.9;
       
-      // creating mapping between zone type and heart rate to calculate average
       const zone_map = new Map();
       zone_map.set('OUT_OF_ZONE', below_zone);
       zone_map.set('FAT_BURN', fat_burn);
       zone_map.set('CARDIO', cardio);
       zone_map.set('PEAK', peak);
 
-    // next step is to get the AVG heart rate for each activity type (one value for each fav_name)
-    console.log(filtered_arr);
     for (let i = 0; i < filtered_arr.length; i++){
       const activity_name = filtered_arr[i].activityName;
       if(filtered_arr[i].averageHeartRate)
@@ -360,15 +344,11 @@ app.get('/fitbittest', async function(req, res) {
         let array_to_update = fav_names.get(activity_name);
         array_to_update.push(filtered_arr[i].averageHeartRate);
         fav_names.set(activity_name, array_to_update);
-        console.log('has heartrate');
       }
       else if(filtered_arr[i].activeZoneMinutes.totalMinutes > 0){
-        // const current_val = fav_names.get(activity_name);
         let current_val = 0;
         let minutes = 0;
         const minutes_in_zone_arr = filtered_arr[i].activeZoneMinutes.minutesInHeartRateZones;
-        // console.log('minutes arr:')
-        // console.log(minutes_in_zone_arr);
         for (let j = 0; j < minutes_in_zone_arr.length; j++){
           const zone_type_name = minutes_in_zone_arr[j].type;
           minutes += minutes_in_zone_arr[j].minutes;
@@ -398,9 +378,6 @@ app.get('/fitbittest', async function(req, res) {
       }
     });
 
-    console.log(fav_names);
-
-    // cant send a map back so we turn it into a JSON and send it back
     const ret_val = Object.fromEntries(fav_names);
     res.send(ret_val);
   }
@@ -409,9 +386,6 @@ app.get('/fitbittest', async function(req, res) {
     res.status(500).send(error);
   }
 })
-
-
-
 
 console.log('Listening on 8888');
 app.listen(8888);
