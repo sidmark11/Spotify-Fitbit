@@ -163,7 +163,7 @@ app.get('/spotifyrefresh_token', function(req, res) {
   });
 });
 
-const fitbit_client_id = process.env.FITBIT_CLIENT_IT;
+const fitbit_client_id = process.env.FITBIT_CLIENT_ID;
 const fitbit_secret_client = process.env.FITBIT_SECRET_CLIENT;
 const fitbit_redirect_uri = 'http://localhost:3000/';
 const fitbit_auth_endpoint = 'https://www.fitbit.com/oauth2/authorize';
