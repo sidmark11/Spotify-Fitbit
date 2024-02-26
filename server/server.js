@@ -45,9 +45,9 @@ app.use(express.static(__dirname + '/public'))
    .use(cookieParser());
 
 if (process.env.NODE_ENV === 'staging' || process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/src')));
+  app.use(express.static(path.join(__dirname, '../client/build')));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname + '../client/src/index.js'))
+    res.sendFile(path.join(__dirname, '../client/build/index.html'));
   })
 }
 
