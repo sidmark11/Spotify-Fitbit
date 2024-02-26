@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Navbar from "./components/Navbar.js";
-import LoginPage from './components/pages/LoginPage.js';
 import PlaylistPage from './components/pages/PlaylistPage.js';
 import HomePage from './components/pages/HomePage.js';
 import { useState, useEffect } from 'react';
@@ -35,8 +34,6 @@ function App() {
         <Navbar isFitbit={fitbitLoggedIn} isSpotify={spotifyLoggedIn}/>
       <Routes>
         <Route path='/' element={<HomePage />}/>
-        <Route path='/spotifylogin' element={<LoginPage />} />
-        <Route path='/fitbitlogin' element={<LoginPage />} />
         <Route path='/playlists' element={<PlaylistPage spotify_token={localStorage.getItem('spotify_access_token')} fitbit_token={localStorage.getItem('fitbit_access_token')} />} />
       </Routes>
     </Router>
