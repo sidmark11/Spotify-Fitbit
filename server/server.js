@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' })
 var axios = require('axios');
 var express = require('express');
 var request = require('request');
@@ -6,8 +7,9 @@ var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
-var spotify_client_id = '1f23b2a56ec84e1f8d92a61f68c696c7'; 
-var spotify_client_secret = '85a4cca80fd54e438c0ce32d31bc8373'; 
+
+var spotify_client_id = process.env.SPOTIFY_CLIENT_ID; 
+var spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 var spotify_redirect_uri = 'http://localhost:8888/spotifycallback'; 
 var spotify_access_token = '';
 var spotify_refersh_token = '';
@@ -161,8 +163,8 @@ app.get('/spotifyrefresh_token', function(req, res) {
   });
 });
 
-const fitbit_client_id = '23RM29';
-const fitbit_secret_client = 'c5809c24b7051f017f979ce0b3aa9eec';
+const fitbit_client_id = process.env.fitbit_client_id;
+const fitbit_secret_client = process.env.fitbit_secret_client;
 const fitbit_redirect_uri = 'http://localhost:3000/';
 const fitbit_auth_endpoint = 'https://www.fitbit.com/oauth2/authorize';
 const fitbit_response_type = 'token';
