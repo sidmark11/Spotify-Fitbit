@@ -84,7 +84,7 @@
 
 .select-clicked {
     border: 2px #2a2f3b solid;
-    box-shadow: 0 0 0.8em #26489a;
+    box-shadow: 0 0 0.8em #39ff14;
 }
 
 
@@ -151,7 +151,7 @@
 }
 
 .menu::-webkit-scrollbar-thumb:hover {
-    background: #26489a;
+    background: #39ff14;
 }
 
 .active {
@@ -165,7 +165,7 @@
 
 .inputField:focus {
   outline: none; 
-  box-shadow: 0 0 0.8em #26489a; 
+  box-shadow: 0 0 0.8em #39ff14; 
 }
 
 
