@@ -9,7 +9,6 @@ const newText = text.split("**").map(str => <p>{str}</p>);
   return (
     <>
         <li className='cards__item'>
-            {/* we passed props from the card.js file, we can call them using props.propName */}
             <Link className='cards__item__link' to={props.path}>
                 <div className='cards__item__info'>
                     <h4 className={` cards__item__text ${var_className}`} style={{ whiteSpace: 'pre-wrap' }}>{newText}</h4>

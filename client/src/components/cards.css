@@ -2,7 +2,6 @@
   margin-top: 30px;
   margin-left: 50px;
   margin-right: 50px;
-  /* padding: 4rem; */
 }
 
 h1 {
@@ -23,8 +22,9 @@ h1 {
 }
 
 .cards__wrapper {
-  position: relative;
-  margin: 50px 0 45px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+  gap: 20px;
 }
 
 .cards__items {
@@ -45,7 +45,6 @@ h1 {
   flex-flow: column;
   width: 100%;
   box-shadow: 0 0px 15px #39ff14;
-  /* -webkit-filter: drop-shadow(0 6px 20px rgba(56, 125, 255, 0.017)); */
   filter: drop-shadow(0 6px 20px rgba(56, 125, 255, 0.017));
   border-radius: 10px;
   overflow: hidden;
@@ -65,22 +64,6 @@ h1 {
   animation-duration: 2s;
 }
 
-/* this is what does the blue label thingy */
-/* .cards__item__badge::after {
-  content: attr(data-category);
-  position: absolute;
-  bottom: 0;
-  margin-left: 10px;
-  padding: 6px 8px;
-  /* width: */
-  /* max-width: calc((100%) - 40px);
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-  background-color: #1f98f4;
-  box-sizing: border-box; */
-/* }  */
-
 .cards__item__img {
   position: absolute;
   top: 0;
@@ -96,7 +79,6 @@ h1 {
   transition: all 0.2s linear;
 }
 
-/* making hover affect on cards */
 .cards__item:hover {
   transform: scale(1.05);
 }
@@ -123,6 +105,15 @@ h1 {
 .card2__text {
   font-size: 23px;
 } 
+
+
+@media (max-width: 768px) { 
+  .cards {
+    margin-left: 10px; 
+    margin-right: 10px;
+  }
+}
+
 
 @media only screen and (min-width: 1200px) {
   .content__blog__container {

@@ -34,8 +34,6 @@
   font-size: 1.8rem;
 }
 
-/* nav-menu.active inherits this because nothing was specified for nav-menu.active
-, which is why the side-menu defaults to the overhead menu when size > 960px */
 .nav-menu {
   display: grid;
   grid-template-columns: repeat(4, auto);
@@ -76,12 +74,10 @@
   display: none;
 }
 
-/* this is for the bars (three line) */
 .menu-icon {
   display: none;
 }
 
-/* if the screen is 960px or less */
 @media screen and (max-width: 960px) { 
   .NavbarItems {
     position: relative;
@@ -110,12 +106,6 @@
     flex-direction: column;
     justify-content: flex-start;
     margin-left: 200px;
-    /* use display: flex to turn the div's children (nav-menu.active div) into flex items
-    , this allows you to arrange the children in a specific way
-    , flex-direction defines the main axis of the container (.nav-menu div)
-    , justify-content helps specify where the children have to fill in from (direction/order) so
-    flex-start says that they should fill in from the beginning of the main axis which is the top of the y-axis
-    in this case*/
   }
 
   .nav-links {
@@ -132,7 +122,6 @@
   }
 
   .navbar-logo {
-    /* position: absolute; */
     top: 0;
     left: 0;
     transform: translate(25%, 50%);
@@ -140,7 +129,6 @@
     justify-content: flex-end;
   }
 
-  /* the bars only display here */
   .menu-icon {
     display: block;
     position: absolute;

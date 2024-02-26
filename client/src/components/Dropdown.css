@@ -1,0 +1,196 @@
+* {
+  box-sizing: border-box;
+}
+
+.dropdown, .inputField, .submit__button {
+  display: inline-block; 
+  margin-right: 1em; 
+  height: 100px; 
+  font-size: medium;
+}
+
+.dropdown {
+  width: 100%;
+  position: relative;
+  height: 100px; 
+  margin-bottom: 1em; 
+}
+
+.inputField:first-of-type {
+    margin-right: 1em;
+}
+
+.dropdown:first-of-type {
+  margin-left: 0; 
+}
+
+.dropdown:last-of-type, .inputField:last-of-type {
+  margin-right: 0;
+  margin-left: 3.5em;
+}
+
+.dropdown + .dropdown {
+  margin-left: 1em; 
+}
+
+.select {
+  background: #2a2f3b;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #2a2f3b;
+  border-radius: 0.5em;
+  padding: 1em;
+  cursor: pointer;
+  transition: 0.3s;
+  height: 100%; 
+}
+
+.inputField {
+  background: #2a2f3b;
+  color: #fff;
+  border: 2px solid #2a2f3b;
+  border-radius: 0.5em;
+  padding: 0.2em 0.5em;
+  width: 100%;
+  height: 100px; 
+  margin-top: 1em; 
+}
+
+.submit__button {
+  background: #2a2f3b;
+  border: 2px solid #2a2f3b;
+  color: white;
+  border-radius: 0.5em;
+  width: 30%;
+  margin: auto;
+  display: block;
+}
+
+.submit__button:hover {
+  background: #323741;
+  transform: scale(1.05);
+}
+
+.select:hover, .inputField:hover,
+.inputField:focus {
+  background: #323741;
+}
+
+.dropdown * {
+    box-sizing: border-box;
+}
+
+.select-clicked {
+    border: 2px #2a2f3b solid;
+    box-shadow: 0 0 0.8em #26489a;
+}
+
+
+.caret {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #fff;
+    transition: 0.3s;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.caret-rotate {
+    transform: rotate(180deg);
+}
+
+.menu {
+  list-style: none;
+  padding: 0.2em 0.5em;
+  background: #323741;
+  border: 1px solid #363a43;
+  box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
+  border-radius: 0.5em;
+  color: #9fa5b5;
+  position: absolute;
+  top: calc(100% + 0.5em); 
+  left: 0;
+  width: 100%;
+  display: none; 
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 1;
+  overflow-y: scroll;
+  max-height: 13em;
+}
+
+.menu li {
+    padding: 0.7em 0.5em;
+    margin: 0.3em 0;
+    border-radius: 0.5em;
+    cursor: pointer;
+    text-align: left;
+}
+
+.menu li:hover {
+    background: #2a2d35
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    border-radius: 10px;
+}
+
+.menu::-webkit-scrollbar-track {
+    background: #2a2d35;
+}
+
+.menu::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+    background: #26489a;
+}
+
+.active {
+    background: #23242a;
+}
+
+.menu-open {
+    display: block;
+    opacity: 1;
+}
+
+.inputField:focus {
+  outline: none; 
+  box-shadow: 0 0 0.8em #26489a; 
+}
+
+
+.inputField input {
+  background: #2a2f3b;
+  border: 1px #363a43 solid;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px #2a2f3b solid;
+  border-radius: 0.5em;
+  padding: 1em;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 100%;
+  font-weight: 200;
+}
+
+.inputField::placeholder {
+  color: white; 
+  opacity: 1; 
+  font-size: 15px;
+}
+
+.inputField .selected {
+  flex: 1; 
+}
