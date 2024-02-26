@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../.env' })
+if (process.env.NODE_ENV !== 'production' || process.env.NODE_ENV !== 'staging') { require('dotenv').config()}
 const path = require('path');
 var axios = require('axios');
 var express = require('express');
