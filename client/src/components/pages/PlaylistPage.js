@@ -138,11 +138,11 @@ function PlaylistPage() {
                     
                     <div className='button__container'>
                         {preferred_genres.length === 1 ? (
-                            <button className="submit__button" onClick={artists}>Create new {selected_workout} playlist: {playlist_name} powered by {preferred_genres} music</button>
+                            <button className="submit__button" onClick={artists}>Create new {selected_workout} playlist '{playlist_name}' powered by {preferred_genres} music</button>
                         ) : preferred_genres.length === 2 ? (
-                            <button className="submit__button" onClick={artists}>Create new {selected_workout} playlist: {playlist_name} powered by {preferred_genres.join(' and ')} music</button>
+                            <button className="submit__button" onClick={artists}>Create new {selected_workout} playlist '{playlist_name}' powered by {preferred_genres.join(' and ')} music</button>
                         ) : (
-                            <button className="submit__button" onClick={artists}>Create new {selected_workout} playlist: {playlist_name}</button> 
+                            <button className="submit__button" onClick={artists}>Create new {selected_workout} playlist '{playlist_name}'</button> 
                         )}
                         
                     </div>
