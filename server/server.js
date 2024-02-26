@@ -163,8 +163,8 @@ app.get('/spotifyrefresh_token', function(req, res) {
   });
 });
 
-const fitbit_client_id = process.env.fitbit_client_id;
-const fitbit_secret_client = process.env.fitbit_secret_client;
+const fitbit_client_id = process.env.FITBIT_CLIENT_IT;
+const fitbit_secret_client = process.env.FITBIT_SECRET_CLIENT;
 const fitbit_redirect_uri = 'http://localhost:3000/';
 const fitbit_auth_endpoint = 'https://www.fitbit.com/oauth2/authorize';
 const fitbit_response_type = 'token';
@@ -389,5 +389,5 @@ app.get('/fitbittest', async function(req, res) {
   }
 })
 
-console.log('Listening on 8888');
-app.listen(8888);
+console.log(`Listening on ${process.env.PORT}`);
+app.listen(process.env.PORT);
