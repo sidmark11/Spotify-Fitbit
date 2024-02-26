@@ -51,7 +51,7 @@ function PlaylistPage() {
          if (localStorage.getItem('fitbit_access_token')) {
             let access_token = localStorage.getItem('fitbit_access_token');
             try {
-                const response = await axios.get('http://localhost:8888/fitbittest', {
+                const response = await axios.get('https://fitmixer-stg-6208d896f43c.herokuapp.com/fitbittest', {
                     headers: {
                         token: access_token
                     }
@@ -68,7 +68,7 @@ function PlaylistPage() {
     async function genres() {
         try {
             let access_token = localStorage.getItem('spotify_access_token');
-            const response = await axios.get('http://localhost:8888/spotifygenre', {
+            const response = await axios.get('https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifygenre', {
                 headers: {
                     token: access_token
                 }
@@ -83,7 +83,7 @@ function PlaylistPage() {
     async function artists () {
         try {
             if(preferred_genres.length > 0 && playlist_name !== "'Playlist Name'" && selected_workout !== "'Workout Type'") {
-                const response = await axios.get('http://localhost:8888/spotifyartist', {
+                const response = await axios.get('https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifyartist', {
                     headers: {
                         genres: preferred_genres,
                         playlist_name: playlist_name,

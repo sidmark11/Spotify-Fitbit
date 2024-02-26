@@ -10,7 +10,7 @@ var cookieParser = require('cookie-parser');
 
 var spotify_client_id = process.env.SPOTIFY_CLIENT_ID; 
 var spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-var spotify_redirect_uri = 'http://localhost:8888/spotifycallback'; 
+var spotify_redirect_uri = 'https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifycallback'; 
 var spotify_access_token = '';
 var spotify_refersh_token = '';
 
@@ -42,6 +42,13 @@ var app = express();
 app.use(express.static(__dirname + '/public'))
    .use(cors())
    .use(cookieParser());
+
+if (process.env.NODE_ENV === 'staging' || process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client/src')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + 'client/src/App.js'))
+  })
+}
 
 
 app.get('/spotifylogin', function(req, res) {
@@ -110,9 +117,9 @@ app.get('/spotifycallback', function(req, res) {
           //console.log(body);
         });
 
-        res.redirect('http://localhost:3000/#spotify')
+        res.redirect('https://fitmixer-stg-6208d896f43c.herokuapp.com/#spotify')
       } else {
-        res.redirect('http://localhost:3000/spotifylogin/#' +
+        res.redirect('https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifylogin/#' +
           querystring.stringify({
             error: 'invalid_token'
           }));
@@ -165,7 +172,7 @@ app.get('/spotifyrefresh_token', function(req, res) {
 
 const fitbit_client_id = process.env.FITBIT_CLIENT_ID;
 const fitbit_secret_client = process.env.FITBIT_SECRET_CLIENT;
-const fitbit_redirect_uri = 'http://localhost:3000/';
+const fitbit_redirect_uri = 'https://fitmixer-stg-6208d896f43c.herokuapp.com/';
 const fitbit_auth_endpoint = 'https://www.fitbit.com/oauth2/authorize';
 const fitbit_response_type = 'token';
 let fitbit_access_token = '';
