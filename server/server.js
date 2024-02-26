@@ -1,4 +1,5 @@
 require('dotenv').config({ path: '../.env' })
+const path = require('path');
 var axios = require('axios');
 var express = require('express');
 var request = require('request');
@@ -43,12 +44,12 @@ app.use(express.static(__dirname + '/public'))
    .use(cors())
    .use(cookieParser());
 
-// if (process.env.NODE_ENV === 'staging' || process.env.NODE_ENV === 'production') {
-//   app.use(express.static(path.join(__dirname, 'client/src')));
-//   app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname + 'client/src/App.js'))
-//   })
-// }
+if (process.env.NODE_ENV === 'staging' || process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client/src')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + 'client/src/App.js'))
+  })
+}
 
 
 app.get('/spotifylogin', function(req, res) {
