@@ -118,9 +118,9 @@ app.get('/spotifycallback', function(req, res) {
           //console.log(body);
         });
 
-        res.redirect('https://fitmixer-stg-6208d896f43c.herokuapp.com/#spotify')
+        res.redirect('https://fitmixer-stg-6208d896f43c.herokuapp.com/')
       } else {
-        res.redirect('https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifylogin/#' +
+        res.redirect('https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifylogin/' +
           querystring.stringify({
             error: 'invalid_token'
           }));
