@@ -52,7 +52,7 @@ if (process.env.NODE_ENV === 'staging' || process.env.NODE_ENV === 'production')
 }
 
 
-app.get('/spotifylogin', function(req, res) {
+app.get('https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifylogin', function(req, res) {
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
 
@@ -395,5 +395,5 @@ app.get('/fitbittest', async function(req, res) {
   }
 })
 
-console.log(`Listening on ${process.env.PORT}`);
+console.log(`Updated server listening on ${process.env.PORT}`);
 app.listen(process.env.PORT);
