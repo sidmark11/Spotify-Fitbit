@@ -66,8 +66,6 @@ app.get('/spotifylogin', function(req, res) {
       redirect_uri: spotify_redirect_uri,
       state: state
     }));
-
-    res.status(200).send("Success");
 });
 
 app.get('/spotifycallback', function(req, res) {
