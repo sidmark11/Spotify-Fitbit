@@ -19,14 +19,14 @@ function Navbar() {
               </Link>
             </li>
             <li className='nav-item'>
-              <Link to='https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifylogin' className='nav-links'>
+              <a href='https://fitmixer-stg-6208d896f43c.herokuapp.com/spotifylogin' className='nav-links'>
                 Spotify Login
-              </Link>
+              </a>
             </li>
             <li className='nav-item'>
-              <Link to='https://fitmixer-stg-6208d896f43c.herokuapp.com/fitbitlogin' className='nav-links'>
+              <a href='https://fitmixer-stg-6208d896f43c.herokuapp.com/fitbitlogin' className='nav-links'>
                 Fitbit Login
-              </Link>
+              </a>
             </li>
           </ul>
           <div>
