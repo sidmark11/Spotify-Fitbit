@@ -40,15 +40,17 @@ var stateKey = 'spotify_auth_state';
 
 var app = express();
 
-app.use(express.static(__dirname + '/public'))
-   .use(cors())
-   .use(cookieParser());
+
 
 if (process.env.NODE_ENV === 'staging' || process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  app.use(express.static(path.join(__dirname, '../client/build'))).use(cors()).use(cookieParser());
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build/index.html'));
   })
+} else {
+  app.use(express.static(__dirname + '/public'))
+  .use(cors())
+  .use(cookieParser());
 }
 
 
