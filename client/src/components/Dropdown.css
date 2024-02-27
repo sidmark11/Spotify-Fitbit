@@ -70,12 +70,14 @@
 
 .submit__button:hover {
   background: #323741;
+  box-shadow: 0 0 0.8em #39ff14; 
   transform: scale(1.05);
 }
 
 .select:hover, .inputField:hover,
 .inputField:focus {
   background: #323741;
+  box-shadow: 0 0 0.8em #39ff14; 
 }
 
 .dropdown * {
@@ -133,7 +135,8 @@
 }
 
 .menu li:hover {
-    background: #2a2d35
+    background: #2a2d35;
+    box-shadow: 0 0 0.8em #39ff14; 
 }
 
 ::-webkit-scrollbar {
@@ -152,6 +155,7 @@
 
 .menu::-webkit-scrollbar-thumb:hover {
     background: #39ff14;
+    box-shadow: 0 0 0.8em #39ff14; 
 }
 
 .active {
